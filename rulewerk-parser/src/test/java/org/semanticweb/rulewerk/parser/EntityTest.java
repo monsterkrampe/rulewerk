@@ -9,9 +9,9 @@ package org.semanticweb.rulewerk.parser;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,8 @@ package org.semanticweb.rulewerk.parser;
  */
 
 import static org.junit.Assert.*;
+
+import java.util.Arrays;
 
 import org.junit.Test;
 import org.semanticweb.rulewerk.core.model.api.Conjunction;
@@ -34,6 +36,7 @@ import org.semanticweb.rulewerk.core.model.api.Rule;
 import org.semanticweb.rulewerk.core.model.api.Term;
 import org.semanticweb.rulewerk.core.model.api.Variable;
 import org.semanticweb.rulewerk.core.model.implementation.AbstractConstantImpl;
+import org.semanticweb.rulewerk.core.model.implementation.DisjunctionImpl;
 import org.semanticweb.rulewerk.core.model.implementation.Expressions;
 import org.semanticweb.rulewerk.core.model.implementation.LanguageStringConstantImpl;
 import org.semanticweb.rulewerk.core.model.implementation.RuleImpl;
@@ -164,7 +167,7 @@ public class EntityTest {
 		Conjunction<PositiveLiteral> headPositiveLiterals = Expressions.makePositiveConjunction(headAtom1);
 		Rule rule1 = new RuleImpl(headPositiveLiterals, bodyLiterals);
 		assertEquals(bodyLiterals, RuleParser.parseRule(rule1.toString()).getBody());
-		assertEquals(headPositiveLiterals, RuleParser.parseRule(rule1.toString()).getHead());
+		assertEquals(new DisjunctionImpl<>(Arrays.asList(headPositiveLiterals)), RuleParser.parseRule(rule1.toString()).getHead());
 	}
 
 	@Test

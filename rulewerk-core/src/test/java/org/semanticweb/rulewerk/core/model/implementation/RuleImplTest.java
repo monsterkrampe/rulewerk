@@ -9,9 +9,9 @@ package org.semanticweb.rulewerk.core.model.implementation;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,12 +29,14 @@ import java.util.List;
 import org.junit.Test;
 import org.semanticweb.rulewerk.core.model.api.Conjunction;
 import org.semanticweb.rulewerk.core.model.api.Constant;
+import org.semanticweb.rulewerk.core.model.api.Disjunction;
 import org.semanticweb.rulewerk.core.model.api.Literal;
 import org.semanticweb.rulewerk.core.model.api.NegativeLiteral;
 import org.semanticweb.rulewerk.core.model.api.PositiveLiteral;
 import org.semanticweb.rulewerk.core.model.api.Rule;
 import org.semanticweb.rulewerk.core.model.api.Variable;
 import org.semanticweb.rulewerk.core.model.implementation.ConjunctionImpl;
+import org.semanticweb.rulewerk.core.model.implementation.DisjunctionImpl;
 import org.semanticweb.rulewerk.core.model.implementation.Expressions;
 import org.semanticweb.rulewerk.core.model.implementation.LanguageStringConstantImpl;
 import org.semanticweb.rulewerk.core.model.implementation.RuleImpl;
@@ -57,7 +59,7 @@ public class RuleImplTest {
 		final Rule rule = Expressions.makeRule(head, body);
 
 		assertEquals(body, rule.getBody());
-		assertEquals(head, rule.getHead());
+		assertEquals(new DisjunctionImpl<>(Arrays.asList(head)), rule.getHead());
 	}
 
 	@Test
@@ -127,7 +129,7 @@ public class RuleImplTest {
 	public void headNotNull() {
 		final Literal literal = Expressions.makePositiveLiteral("p", Expressions.makeUniversalVariable("X"));
 		final Conjunction<Literal> body = Expressions.makeConjunction(literal);
-		Expressions.makeRule(null, body);
+		Expressions.makeRule((Disjunction<Conjunction<PositiveLiteral>>) null, body);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

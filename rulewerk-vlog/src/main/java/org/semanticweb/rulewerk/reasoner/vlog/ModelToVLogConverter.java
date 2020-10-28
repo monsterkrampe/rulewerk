@@ -9,9 +9,9 @@ package org.semanticweb.rulewerk.reasoner.vlog;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ package org.semanticweb.rulewerk.reasoner.vlog;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.semanticweb.rulewerk.core.exceptions.RulewerkRuntimeException;
 import org.semanticweb.rulewerk.core.model.api.Conjunction;
@@ -126,7 +127,9 @@ final class ModelToVLogConverter {
 	}
 
 	static karmaresearch.vlog.Rule toVLogRule(final Rule rule) {
-		final karmaresearch.vlog.Atom[] vLogHead = toVLogAtomArray(rule.getHead());
+		// TODO: double check treating as conjunction
+		final karmaresearch.vlog.Atom[] vLogHead = rule.getHead().getConjunctions().stream().flatMap(c -> Stream.of(toVLogAtomArray(c))).toArray(karmaresearch.vlog.Atom[]::new);
+
 		final karmaresearch.vlog.Atom[] vLogBody = toVLogAtomArray(rule.getBody());
 		return new karmaresearch.vlog.Rule(vLogHead, vLogBody);
 	}

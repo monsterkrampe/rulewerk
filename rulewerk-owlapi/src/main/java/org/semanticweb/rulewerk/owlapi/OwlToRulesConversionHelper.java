@@ -9,9 +9,9 @@ package org.semanticweb.rulewerk.owlapi;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,6 +44,7 @@ import org.semanticweb.rulewerk.core.model.implementation.PositiveLiteralImpl;
 import org.semanticweb.rulewerk.core.model.implementation.PredicateImpl;
 import org.semanticweb.rulewerk.core.reasoner.implementation.Skolemization;
 import org.semanticweb.rulewerk.owlapi.AbstractClassToRuleConverter.SimpleConjunction;
+import org.semanticweb.rulewerk.owlapi.AbstractClassToRuleConverter.SimpleDisjunction;
 
 /**
  * Utility class for helper functions that are used to convert OWL API objects
@@ -128,6 +129,17 @@ public class OwlToRulesConversionHelper {
 			conjuncts.makeFalse();
 		} else {
 			conjuncts.add(getObjectPropertyAtom(owlObjectPropertyExpression, sourceTerm, targetTerm));
+		}
+	}
+
+	static void addConjunctForPropertyExpression(final OWLObjectPropertyExpression owlObjectPropertyExpression,
+			final Term sourceTerm, final Term targetTerm, final SimpleDisjunction disjuncts) {
+		if (owlObjectPropertyExpression.isOWLTopObjectProperty()) {
+			disjuncts.makeTrue();
+		} else if (owlObjectPropertyExpression.isOWLBottomObjectProperty()) {
+			disjuncts.init();
+		} else {
+			disjuncts.addConjuncts(getObjectPropertyAtom(owlObjectPropertyExpression, sourceTerm, targetTerm));
 		}
 	}
 

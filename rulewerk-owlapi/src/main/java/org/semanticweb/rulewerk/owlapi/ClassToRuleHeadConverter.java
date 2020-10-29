@@ -9,9 +9,9 @@ package org.semanticweb.rulewerk.owlapi;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -57,13 +57,13 @@ public class ClassToRuleHeadConverter extends AbstractClassToRuleConverter imple
 
 	boolean currentIsExistential = false;
 
-	public ClassToRuleHeadConverter(final Term mainTerm, final SimpleConjunction body, final SimpleConjunction head,
+	public ClassToRuleHeadConverter(final Term mainTerm, final SimpleConjunction body, final SimpleDisjunction head,
 			final OwlAxiomToRulesConverter parent) {
 		super(mainTerm, body, head, parent);
 	}
 
 	public ClassToRuleHeadConverter(final Term mainTerm, final OwlAxiomToRulesConverter parent) {
-		this(mainTerm, new SimpleConjunction(), new SimpleConjunction(), parent);
+		this(mainTerm, new SimpleConjunction(), new SimpleDisjunction(), parent);
 	}
 
 	@Override
@@ -74,12 +74,12 @@ public class ClassToRuleHeadConverter extends AbstractClassToRuleConverter imple
 	@Override
 	public void visit(final OWLClass ce) {
 		if (ce.isOWLNothing()) {
-			this.head.makeFalse();
-		} else if (ce.isOWLThing()) {
 			this.head.init();
+		} else if (ce.isOWLThing()) {
+			this.head.makeTrue();
 		} else {
 			final Predicate predicate = OwlToRulesConversionHelper.getClassPredicate(ce);
-			this.head.add(new PositiveLiteralImpl(predicate, Arrays.asList(this.mainTerm)));
+			this.head.addConjuncts(new PositiveLiteralImpl(predicate, Arrays.asList(this.mainTerm)));
 		}
 	}
 
@@ -119,7 +119,7 @@ public class ClassToRuleHeadConverter extends AbstractClassToRuleConverter imple
 	@Override
 	public void visit(final OWLObjectMinCardinality ce) {
 		if (ce.getCardinality() == 0) {
-			this.head.init(); // tautological
+			this.head.makeTrue(); // tautological
 		} else if (ce.getCardinality() == 1) {
 			this.handleObjectSomeValues(ce.getProperty(), ce.getFiller());
 		} else {

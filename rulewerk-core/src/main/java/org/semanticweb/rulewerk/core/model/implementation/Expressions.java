@@ -373,4 +373,19 @@ public final class Expressions {
 
 	}
 
+	/**
+	 * Creates a {@link Rule}.
+	 *
+	 * @param head conjunction of positive (non-negated) literals
+	 * @param body conjunction of positive (non-negated) literals
+	 * @return a {@link Rule} corresponding to the input
+	 */
+	public static Rule makePositiveLiteralsRule(final Disjunction<Conjunction<PositiveLiteral>> head,
+			final Conjunction<PositiveLiteral> body) {
+		final List<Literal> bodyLiteralList = new ArrayList<>(body.getLiterals());
+		final Conjunction<Literal> literalsBody = makeConjunction(bodyLiteralList);
+		return new RuleImpl(head, literalsBody);
+
+	}
+
 }

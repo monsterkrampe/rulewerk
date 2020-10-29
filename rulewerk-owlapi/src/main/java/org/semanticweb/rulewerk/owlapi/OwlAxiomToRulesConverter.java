@@ -9,9 +9,9 @@ package org.semanticweb.rulewerk.owlapi;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -68,6 +68,7 @@ import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.SWRLRule;
 import org.semanticweb.rulewerk.core.model.api.Conjunction;
+import org.semanticweb.rulewerk.core.model.api.Disjunction;
 import org.semanticweb.rulewerk.core.model.api.Fact;
 import org.semanticweb.rulewerk.core.model.api.Literal;
 import org.semanticweb.rulewerk.core.model.api.PositiveLiteral;
@@ -76,6 +77,7 @@ import org.semanticweb.rulewerk.core.model.api.Term;
 import org.semanticweb.rulewerk.core.model.api.TermType;
 import org.semanticweb.rulewerk.core.model.api.Variable;
 import org.semanticweb.rulewerk.core.model.implementation.ConjunctionImpl;
+import org.semanticweb.rulewerk.core.model.implementation.DisjunctionImpl;
 import org.semanticweb.rulewerk.core.model.implementation.ExistentialVariableImpl;
 import org.semanticweb.rulewerk.core.model.implementation.Expressions;
 import org.semanticweb.rulewerk.core.model.implementation.FactImpl;
@@ -143,15 +145,17 @@ public class OwlAxiomToRulesConverter implements OWLAxiomVisitor {
 	 */
 	void addRule(final AbstractClassToRuleConverter converter) {
 		if (!converter.isTautology()) {
-			final Conjunction<PositiveLiteral> headConjunction = this.constructHeadConjunction(converter);
+			final Disjunction<Conjunction<PositiveLiteral>> headDisjunction = this.constructHeadDisjunction(converter);
 
-			if (converter.body.isTrueOrEmpty() && (headConjunction.getVariables().count() == 0)) {
-				for (final PositiveLiteral conjunct : headConjunction.getLiterals()) {
-					this.facts.add(new FactImpl(conjunct.getPredicate(), conjunct.getArguments()));
+			if (converter.body.isTrueOrEmpty() && (headDisjunction.getVariables().count() == 0)) {
+				for (final Conjunction<PositiveLiteral> disjunct : headDisjunction.getConjunctions()) {
+					for (final PositiveLiteral conjunct : disjunct.getLiterals()) {
+						this.facts.add(new FactImpl(conjunct.getPredicate(), conjunct.getArguments()));
+					}
 				}
 			} else {
 				final Conjunction<PositiveLiteral> bodyConjunction = this.constructBodyConjunction(converter);
-				this.rules.add(Expressions.makePositiveLiteralsRule(headConjunction, bodyConjunction));
+				this.rules.add(Expressions.makePositiveLiteralsRule(headDisjunction, bodyConjunction));
 			}
 		}
 	}
@@ -164,11 +168,11 @@ public class OwlAxiomToRulesConverter implements OWLAxiomVisitor {
 		}
 	}
 
-	private Conjunction<PositiveLiteral> constructHeadConjunction(final AbstractClassToRuleConverter converter) {
+	private Disjunction<Conjunction<PositiveLiteral>> constructHeadDisjunction(final AbstractClassToRuleConverter converter) {
 		if (converter.head.isFalseOrEmpty()) {
-			return new ConjunctionImpl<>(Arrays.asList(OwlToRulesConversionHelper.getBottom(converter.mainTerm)));
+			return new DisjunctionImpl<Conjunction<PositiveLiteral>>(Arrays.asList(new ConjunctionImpl<PositiveLiteral>(Arrays.asList(OwlToRulesConversionHelper.getBottom(converter.mainTerm)))));
 		} else {
-			return new ConjunctionImpl<>(converter.head.getConjuncts());
+			return new DisjunctionImpl<Conjunction<PositiveLiteral>>(converter.head.getDisjuncts().stream().map(d -> new ConjunctionImpl<PositiveLiteral>(d.getConjuncts())).collect(Collectors.toList()));
 		}
 	}
 
